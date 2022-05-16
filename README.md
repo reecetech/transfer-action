@@ -1,2 +1,17 @@
 # transfer-action
-This action transfers data between self-hosted and GitHub-hosted runners
+
+This action transfers data to/from artefact storage
+
+
+## Usage
+
+```yaml
+....tba...
+```
+
+
+## Inputs
+
+
+## Outputs
+
