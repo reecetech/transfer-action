@@ -1,0 +1,102 @@
+---
+name: 'Data transfer action'
+description: |
+  This action transfers data to/from artefact storage
+
+branding:
+  icon: package
+  color: purple
+
+inputs:
+  checkout:
+    description: 'Do a Git checkout before transferring, either: `true` or `false`; defaults to `false`'
+    default: 'false'
+  checkout-fetch-depth:
+    description: 'Number of commits to fetch. 0 indicates all history for all branches and tags'
+    default: 1
+  checkout-lfs:
+    description: 'Whether to download Git-LFS files'
+    default: 'false'
+  direction:
+    description: 'Direction of transfer, either: `upload` or `download`'
+    required: true
+  if-no-files-found:
+    description: >
+      The desired behavior if no files are found using the provided path.
+
+      Available Options:
+        warn: Output a warning but do not fail the action
+        error: Fail the action with an error message
+        ignore: Do not output any warnings or errors, the action does not fail
+    default: 'error'
+  name:
+    description: 'Artifact name: defaults to `checkout` if checkout input is `true`, otherwise, please provide a value'
+  path:
+    description: |
+      Defaults to `./` - additionally, the meaning of `path` is:
+      if direction is `upload`: a file, directory or wildcard pattern that describes what to upload;
+      if direction is `download`: destination path
+    default: './'
+
+outputs:
+  name:
+    description: 'Artifact name'
+    value: ${{ steps.verify.outputs.name }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: verify
+      name: Verify inputs 🔎
+      shell: bash
+      env:
+        CHECKOUT: ${{ inputs.checkout }}
+        DIRECTION: ${{ inputs.direction }}
+      run: |
+        set -euo pipefail
+
+        if [[ "${CHECKOUT}" != 'true' && "${CHECKOUT}" != 'false' ]] ; then
+          echo "🛑 checkout input set to '${CHECKOUT}', should be either 'true' or 'false'"
+          exit 1
+        fi
+
+        if [[ "${DIRECTION}" != 'upload' && "${DIRECTION}" != 'download' ]] ; then
+          echo "🛑 direction input set to '${DIRECTION}', should be either 'upload' or 'download'"
+          exit 2
+        fi
+
+        if [[ -n "${NAME:-}" ]] ; then
+          echo "::set-output name=name::${NAME}"
+        else
+          if [[ "${CHECKOUT}" == 'true' ]] ; then
+            echo "::set-output name=name::checkout"
+          else
+            echo "🛑 name input has not been provided, need a value"
+            exit 3
+          fi
+        fi
+
+    - id: checkout
+      if: inputs.checkout == 'true'
+      name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: ${{ inputs.checkout-fetch-depth }}
+        lfs: ${{ inputs.checkout-lfs }}
+
+    - id: transfer-up
+      if: inputs.direction == 'upload'
+      name: Transfer data to GitHub
+      uses: actions/upload-artifact@v3
+      with:
+        if-no-files-found: ${{ inputs.if-no-files-found }}
+        name: ${{ steps.verify.outputs.name }}
+        path: ${{ inputs.path }}
+
+    - id: transfer-down
+      if: inputs.direction == 'download'
+      name: Transfer data from GitHub
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ steps.verify.outputs.name }}
+        path: ${{ inputs.path }}
