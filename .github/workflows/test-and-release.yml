@@ -1,7 +1,7 @@
 ---
 name: Test and Release
 
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - '**'
@@ -35,6 +35,8 @@ jobs:
       - id: auto-doc
         name: Run auto-doc 📃
         uses: tj-actions/auto-doc@v1.2.14
+        with:
+          action: 'action.yaml'
 
       - id: changes
         name: Verify Changed files
@@ -75,7 +77,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: false
           prerelease: false
-          automatic_release_tag: "${{ steps.version.outputs.version }}"
+          automatic_release_tag: "${{ steps.version.outputs.v-version }}"
 
       - id: update-major-tag
         if: ${{ github.ref_name == github.event.repository.default_branch }}
