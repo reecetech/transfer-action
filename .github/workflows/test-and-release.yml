@@ -22,6 +22,45 @@ jobs:
         with:
           strict: true
 
+  test-up:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Checkout code 🛒
+        uses: actions/checkout@v3
+
+      - id: checkout-upload
+        name: Checkout and upload 📦
+        uses: ./
+        with:
+          checkout: 'true'
+          direction: 'upload'
+    outputs:
+      name: ${{ steps.checkout-upload.outputs.name }}
+
+  test-down:
+    runs-on: ubuntu-latest
+    needs: test-up
+    steps:
+      - id: checkout
+        name: Checkout code 🛒
+        uses: actions/checkout@v3
+
+      - id: checkout-download
+        name: Download checkout 📥
+        uses: ./
+        with:
+          direction: 'download'
+          name: ${{ needs.test-up.outputs.name }}
+          path: 'download/'
+
+      - id: test-git
+        name: Git status 🤷
+        run: |
+          set -euo pipefail
+          cd download
+          git status
+
   update-doc:
     if: ${{ github.ref_name != github.event.repository.default_branch }}
     runs-on: ubuntu-latest
@@ -39,7 +78,7 @@ jobs:
           action: 'action.yaml'
 
       - id: changes
-        name: Verify Changed files
+        name: Verify changed files 🔎
         uses: tj-actions/verify-changed-files@v8.6
         with:
           files: |
@@ -47,7 +86,7 @@ jobs:
 
       - id: commit
         if: steps.changes.outputs.files_changed == 'true'
-        name: Commit README changes
+        name: Commit README changes 📥
         uses: EndBug/add-and-commit@v9
         with:
           message: 'Update README'
@@ -59,6 +98,7 @@ jobs:
     if: ${{ github.ref_name == github.event.repository.default_branch }}
     needs:
       - lint
+      - test-down
     runs-on: ubuntu-latest
     steps:
       - id: checkout
