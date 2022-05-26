@@ -40,7 +40,6 @@ inputs:
       Additionally, the meaning of `path` is:
       - if direction is `upload`: a file, directory or wildcard pattern that describes what to upload;
       - if direction is `download`: destination path
-    default: './'
 
 outputs:
   name:
@@ -94,8 +93,7 @@ runs:
           if [[ "${CHECKOUT}" == 'true' ]] ; then
             echo "::set-output name=path::./.git/"
           else
-            echo "🛑 path input has not been provided, need a value"
-            exit 4
+            echo "::set-output name=path::./"
           fi
         fi
 
@@ -138,4 +136,4 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        git checkout "${{ github.ref_name }}"
+        git checkout --progress --force -B "${{ github.ref_name }}" "${{ github.ref }}"
