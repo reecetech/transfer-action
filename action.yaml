@@ -33,9 +33,13 @@ inputs:
     description: 'Artifact name: defaults to `checkout` if checkout input is `true`, otherwise, please provide a value'
   path:
     description: |
-      Defaults to `./` - additionally, the meaning of `path` is:
-      if direction is `upload`: a file, directory or wildcard pattern that describes what to upload;
-      if direction is `download`: destination path
+      ⚠️ Conditional defaults!
+      - if `checkout` is `true`; then defaults to `./.git/`
+      - if `checkout` is `false`; then defaults to `./`
+
+      Additionally, the meaning of `path` is:
+      - if direction is `upload`: a file, directory or wildcard pattern that describes what to upload;
+      - if direction is `download`: destination path
     default: './'
 
 outputs:
@@ -53,8 +57,15 @@ runs:
         CHECKOUT: ${{ inputs.checkout }}
         DIRECTION: ${{ inputs.direction }}
         NAME: ${{ inputs.name }}
+        PATH: ${{ inputs.path }}
+        LFS: ${{ inputs.checkout-lfs }}
       run: |
         set -euo pipefail
+
+        if [[ "${LFS}" != 'false' ]] ; then
+          echo "🛑 sorry, LFS functionality not yet implemented"
+          exit 255
+        fi
 
         if [[ "${CHECKOUT}" != 'true' && "${CHECKOUT}" != 'false' ]] ; then
           echo "🛑 checkout input set to '${CHECKOUT}', should be either 'true' or 'false'"
@@ -77,28 +88,54 @@ runs:
           fi
         fi
 
-    - id: checkout
-      if: inputs.checkout == 'true'
-      name: Checkout repo
+        if [[ -n "${PATH:-}" ]] ; then
+          echo "::set-output name=path::${PATH}"
+        else
+          if [[ "${CHECKOUT}" == 'true' ]] ; then
+            echo "::set-output name=path::./.git/"
+          else
+            echo "🛑 path input has not been provided, need a value"
+            exit 4
+          fi
+        fi
+
+    - id: clone
+      if: inputs.checkout == 'true' && inputs.direction == 'upload'
+      name: Clone repo ⧉
       uses: actions/checkout@v3
       with:
         fetch-depth: ${{ inputs.checkout-fetch-depth }}
-        lfs: ${{ inputs.checkout-lfs }}
+
+    - id: prepare-dot-git
+      if: inputs.checkout == 'true' && inputs.direction == 'upload'
+      name: Remove index 🗑
+      shell: bash
+      run: |
+        set -euo pipefail
+        rm -f .git/index
 
     - id: transfer-up
       if: inputs.direction == 'upload'
-      name: Transfer data to GitHub
+      name: Transfer data to GitHub 🆙
       uses: actions/upload-artifact@v3
       with:
         if-no-files-found: ${{ inputs.if-no-files-found }}
         name: ${{ steps.verify.outputs.name }}
-        path: ${{ inputs.path }}
+        path: ${{ steps.verify.outputs.path }}
         retention-days: 1
 
     - id: transfer-down
       if: inputs.direction == 'download'
-      name: Transfer data from GitHub
+      name: Transfer data from GitHub ⬇️
       uses: actions/download-artifact@v3
       with:
         name: ${{ steps.verify.outputs.name }}
-        path: ${{ inputs.path }}
+        path: ${{ steps.verify.outputs.path }}
+
+    - id: checkout
+      if: inputs.checkout == 'true' && inputs.direction == 'download'
+      name: Checkout repo 🛒
+      shell: bash
+      run: |
+        set -euo pipefail
+        git checkout "${{ github.ref_name }}"

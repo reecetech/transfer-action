@@ -50,9 +50,10 @@ jobs:
         name: Download checkout 📥
         uses: ./
         with:
+          checkout: 'true'
           direction: 'download'
-          name: ${{ needs.test-up.outputs.name }}
-          path: 'download/'
+          name: ${{ needs.test-up.outputs.name }}  # not strictly needed, but tests the output was set
+          path: 'download/'  # needs to be a subdir, because we had to checkout the repo in the prior step to actually test
 
       - id: test-git
         name: Git status 🤷
@@ -60,6 +61,10 @@ jobs:
           set -euo pipefail
           cd download
           git status
+          if [[ ! -f action.yaml ]] ; then
+            echo "🛑 'action.yaml' is not found!"
+            exit 1
+          fi
 
   update-doc:
     if: ${{ github.ref_name != github.event.repository.default_branch }}

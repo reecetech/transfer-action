@@ -12,7 +12,7 @@ This action transfers data to/from artefact storage
     runs-on: [self-hosted]
     steps:
       - name: Upload repo
-        uses: reecetech/transfer-action@v1
+        uses: reecetech/transfer-action@v2
         with:
           checkout: 'true'
           direction: 'upload'
@@ -27,10 +27,10 @@ This action transfers data to/from artefact storage
       - checkout
     steps:
       - name: Download repo
-        uses: reecetech/transfer-action@v1
+        uses: reecetech/transfer-action@v2
         with:
+          checkout: 'true'
           direction: 'download'
-          name: 'checkout'
 ```
 
 ### Upload specific build results
@@ -38,7 +38,7 @@ This action transfers data to/from artefact storage
 ```yaml
       - id: upload
         name: Upload build output
-        uses: reecetech/transfer-action@v1
+        uses: reecetech/transfer-action@v2
         with:
           direction: 'upload'
           name: 'build-result'
@@ -49,7 +49,7 @@ This action transfers data to/from artefact storage
 
 ```yaml
       - name: Download build output
-        uses: reecetech/transfer-action@v1
+        uses: reecetech/transfer-action@v2
         with:
           direction: 'download'
           name: 'build-result'
