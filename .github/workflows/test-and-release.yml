@@ -28,15 +28,41 @@ jobs:
       - id: checkout
         name: Checkout code 🛒
         uses: actions/checkout@v3
+        with:
+          path: transfer-action
+
+      - id: create-file
+        name: Create a file 🆕
+        shell: bash
+        run: |
+          set -euo pipefail
+          touch foo
+
+      - id: given-upload
+        name: Upload a given file 📤
+        uses: ./transfer-action/
+        with:
+          direction: 'upload'
+          name: 'foo'
+          path: './foo'
 
       - id: checkout-upload
         name: Checkout and upload 📦
-        uses: ./
+        uses: ./transfer-action/
         with:
           checkout: 'true'
           direction: 'upload'
+
+      - id: checkout-again
+        # have to do this because the `checkout-upload` step cleans the working dir
+        name: Checkout code (again) 🛒
+        uses: actions/checkout@v3
+        with:
+          path: transfer-action
+
     outputs:
-      name: ${{ steps.checkout-upload.outputs.name }}
+      checkout-name: ${{ steps.checkout-upload.outputs.name }}
+      given-name: ${{ steps.given-upload.outputs.name }}
 
   test-down:
     runs-on: ubuntu-latest
@@ -45,21 +71,42 @@ jobs:
       - id: checkout
         name: Checkout code 🛒
         uses: actions/checkout@v3
+        with:
+          path: transfer-action
 
       - id: checkout-download
         name: Download checkout 📥
-        uses: ./
+        uses: ./transfer-action/
         with:
+          checkout: 'true'
           direction: 'download'
-          name: ${{ needs.test-up.outputs.name }}
-          path: 'download/'
+          name: ${{ needs.test-up.outputs.checkout-name }}  # not strictly needed, but tests the output was set
 
       - id: test-git
         name: Git status 🤷
         run: |
           set -euo pipefail
-          cd download
           git status
+          if [[ ! -f action.yaml ]] ; then
+            echo "🛑 'action.yaml' is not found!"
+            exit 1
+          fi
+
+      - id: given-download
+        name: Download given file 📨
+        uses: ./transfer-action/
+        with:
+          direction: 'download'
+          name: ${{ needs.test-up.outputs.given-name }}
+
+      - id: test-file
+        name: Did the file download? 🔎
+        run: |
+          set -euo pipefail
+          if [[ ! -f foo ]] ; then
+            echo "🛑 'foo' is not found!"
+            exit 1
+          fi
 
   update-doc:
     if: ${{ github.ref_name != github.event.repository.default_branch }}
