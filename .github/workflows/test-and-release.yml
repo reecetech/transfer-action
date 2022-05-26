@@ -31,6 +31,21 @@ jobs:
         with:
           path: transfer-action
 
+      - id: create-file
+        name: Create a file 🆕
+        shell: bash
+        run: |
+          set -euo pipefail
+          touch foo
+
+      - id: given-upload
+        name: Upload a given file 📤
+        uses: ./transfer-action/
+        with:
+          direction: 'upload'
+          name: 'foo'
+          path: './foo'
+
       - id: checkout-upload
         name: Checkout and upload 📦
         uses: ./transfer-action/
@@ -46,7 +61,8 @@ jobs:
           path: transfer-action
 
     outputs:
-      name: ${{ steps.checkout-upload.outputs.name }}
+      checkout-name: ${{ steps.checkout-upload.outputs.name }}
+      given-name: ${{ steps.given-upload.outputs.name }}
 
   test-down:
     runs-on: ubuntu-latest
@@ -64,7 +80,7 @@ jobs:
         with:
           checkout: 'true'
           direction: 'download'
-          name: ${{ needs.test-up.outputs.name }}  # not strictly needed, but tests the output was set
+          name: ${{ needs.test-up.outputs.checkout-name }}  # not strictly needed, but tests the output was set
 
       - id: test-git
         name: Git status 🤷
@@ -73,6 +89,22 @@ jobs:
           git status
           if [[ ! -f action.yaml ]] ; then
             echo "🛑 'action.yaml' is not found!"
+            exit 1
+          fi
+
+      - id: given-download
+        name: Download given file 📨
+        uses: ./transfer-action/
+        with:
+          direction: 'download'
+          name: ${{ needs.test-up.outputs.given-name }}
+
+      - id: test-file
+        name: Did the file download? 🔎
+        run: |
+          set -euo pipefail
+          if [[ ! -f foo ]] ; then
+            echo "🛑 'foo' is not found!"
             exit 1
           fi
 
