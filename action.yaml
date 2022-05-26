@@ -136,4 +136,18 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        git checkout --progress --force -B "${{ github.ref_name }}" "${{ github.ref }}"
+
+        # Compatibility with pull request triggers
+        if [[ -n "${{ github.head_ref }}" ]] ; then
+          export ref="refs/heads/${{ github.head_ref }}"
+          export ref_name="${{ github.head_ref }}"
+        else
+          export ref="${{ github.ref }}"
+          export ref_name="${{ github.ref_name }}"
+        fi
+
+        if [[ "${{ github.ref_type }}" == 'tag' ]] ; then
+          git checkout --progress --force "${ref}"
+        else
+          git checkout --progress --force -B "${ref_name}" "${ref}"
+        fi
