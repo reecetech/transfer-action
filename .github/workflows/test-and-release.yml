@@ -28,13 +28,23 @@ jobs:
       - id: checkout
         name: Checkout code 🛒
         uses: actions/checkout@v3
+        with:
+          path: transfer-action
 
       - id: checkout-upload
         name: Checkout and upload 📦
-        uses: ./
+        uses: ./transfer-action/
         with:
           checkout: 'true'
           direction: 'upload'
+
+      - id: checkout-again
+        # have to do this because the `checkout-upload` step cleans the working dir
+        name: Checkout code (again) 🛒
+        uses: actions/checkout@v3
+        with:
+          path: transfer-action
+
     outputs:
       name: ${{ steps.checkout-upload.outputs.name }}
 
@@ -45,21 +55,21 @@ jobs:
       - id: checkout
         name: Checkout code 🛒
         uses: actions/checkout@v3
+        with:
+          path: transfer-action
 
       - id: checkout-download
         name: Download checkout 📥
-        uses: ./
+        uses: ./transfer-action/
         with:
           checkout: 'true'
           direction: 'download'
           name: ${{ needs.test-up.outputs.name }}  # not strictly needed, but tests the output was set
-          path: 'download/'  # needs to be a subdir, because we had to checkout the repo in the prior step to actually test
 
       - id: test-git
         name: Git status 🤷
         run: |
           set -euo pipefail
-          cd download
           git status
           if [[ ! -f action.yaml ]] ; then
             echo "🛑 'action.yaml' is not found!"
