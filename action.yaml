@@ -138,16 +138,16 @@ runs:
         set -euo pipefail
 
         # Compatibility with pull request triggers
-        if [[ -n "${{ github.head_ref }}" ]] ; then
-          export ref="refs/heads/${{ github.head_ref }}"
+        if [[ -n "${{ github.head_ref }}" ]] ; then  # if `head_ref` set, then it's a pull request
+          export ref="refs/remotes/pull/${{ github.ref_name }}"
           export ref_name="${{ github.head_ref }}"
         else
           export ref="${{ github.ref }}"
           export ref_name="${{ github.ref_name }}"
         fi
 
-        if [[ "${{ github.ref_type }}" == 'tag' ]] ; then
-          git checkout --progress --force "${ref}"
-        else
+        if [[ "${{ github.ref_type }}" == 'branch' && -z "${{ github.head_ref }}" ]] ; then
           git checkout --progress --force -B "${ref_name}" "${ref}"
+        else
+          git checkout --progress --force "${ref}"
         fi
