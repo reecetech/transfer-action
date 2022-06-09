@@ -18,7 +18,7 @@ jobs:
 
       - id: yamllint
         name: Run yamllint 📃
-        uses: ibiqlik/action-yamllint@76fdac38393593cc46d89860c3e9698d4fe6b1a4  # v2
+        uses: ibiqlik/action-yamllint@v3
         with:
           strict: true
 
@@ -120,13 +120,13 @@ jobs:
 
       - id: auto-doc
         name: Run auto-doc 📃
-        uses: tj-actions/auto-doc@v1.2.14
+        uses: tj-actions/auto-doc@v1.2.15
         with:
           action: 'action.yaml'
 
       - id: changes
         name: Verify changed files 🔎
-        uses: tj-actions/verify-changed-files@v8.6
+        uses: tj-actions/verify-changed-files@v9.1
         with:
           files: |
             README.md
