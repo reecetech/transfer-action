@@ -87,6 +87,8 @@ runs:
           fi
         fi
 
+        echo "Path env Value: ${PATH}"
+
         if [[ -n "${PATH:-}" ]] ; then
           echo "::set-output name=path::${PATH}"
         else
