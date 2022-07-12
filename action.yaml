@@ -56,7 +56,7 @@ runs:
         CHECKOUT: ${{ inputs.checkout }}
         DIRECTION: ${{ inputs.direction }}
         NAME: ${{ inputs.name }}
-        PATHH: ${{ inputs.path }}
+        NEW_PATH: ${{ inputs.path }}
         LFS: ${{ inputs.checkout-lfs }}
       run: |
         set -euo pipefail
@@ -87,10 +87,10 @@ runs:
           fi
         fi
 
-        echo "Path env Value: ${PATHH}"
+        echo "Path env Value: ${NEW_PATH}"
 
-        if [[ -n "${PATH:-}" ]] ; then
-          echo "::set-output name=path::${PATH}"
+        if [[ -n "${NEW_PATH:-}" ]] ; then
+          echo "::set-output name=path::${NEW_PATH}"
         else
           if [[ "${CHECKOUT}" == 'true' ]] ; then
             echo "::set-output name=path::./.git/"
