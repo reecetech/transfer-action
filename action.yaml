@@ -56,7 +56,7 @@ runs:
         CHECKOUT: ${{ inputs.checkout }}
         DIRECTION: ${{ inputs.direction }}
         NAME: ${{ inputs.name }}
-        PATH: ${{ inputs.path }}
+        DIR_PATH: ${{ inputs.path }}
         LFS: ${{ inputs.checkout-lfs }}
       run: |
         set -euo pipefail
@@ -87,8 +87,8 @@ runs:
           fi
         fi
 
-        if [[ -n "${PATH:-}" ]] ; then
-          echo "::set-output name=path::${PATH}"
+        if [[ -n "${DIR_PATH:-}" ]] ; then
+          echo "::set-output name=path::${DIR_PATH}"
         else
           if [[ "${CHECKOUT}" == 'true' ]] ; then
             echo "::set-output name=path::./.git/"
