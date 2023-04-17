@@ -77,10 +77,10 @@ runs:
         fi
 
         if [[ -n "${NAME:-}" ]] ; then
-          echo "::set-output name=name::${NAME}"
+          echo "name=${NAME}" >> $GITHUB_OUTPUT
         else
           if [[ "${CHECKOUT}" == 'true' ]] ; then
-            echo "::set-output name=name::checkout"
+            echo "name=checkout" >> $GITHUB_OUTPUT
           else
             echo "🛑 name input has not been provided, need a value"
             exit 3
@@ -88,12 +88,12 @@ runs:
         fi
 
         if [[ -n "${DIR_PATH:-}" ]] ; then
-          echo "::set-output name=path::${DIR_PATH}"
+          echo "path=${DIR_PATH}" >> $GITHUB_OUTPUT
         else
           if [[ "${CHECKOUT}" == 'true' ]] ; then
-            echo "::set-output name=path::./.git/"
+            echo "path=./.git/" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=path::./"
+            echo "path=./" >> $GITHUB_OUTPUT
           fi
         fi
 

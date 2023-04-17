@@ -120,13 +120,13 @@ jobs:
 
       - id: auto-doc
         name: Run auto-doc 📃
-        uses: tj-actions/auto-doc@v1.2.15
+        uses: tj-actions/auto-doc@v2.3.2
         with:
           action: 'action.yaml'
 
       - id: changes
         name: Verify changed files 🔎
-        uses: tj-actions/verify-changed-files@v9.1
+        uses: tj-actions/verify-changed-files@v14.0.1
         with:
           files: |
             README.md
@@ -154,7 +154,7 @@ jobs:
 
       - id: version
         name: Calculate next version 🔢
-        uses: reecetech/version-increment@2022.5.1
+        uses: reecetech/version-increment@2023.3.1
 
       - id: release
         if: ${{ github.ref_name == github.event.repository.default_branch }}
