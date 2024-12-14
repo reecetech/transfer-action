@@ -14,7 +14,7 @@ jobs:
     steps:
       - id: checkout
         name: Checkout code 🛒
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - id: yamllint
         name: Run yamllint 📃
@@ -27,7 +27,7 @@ jobs:
     steps:
       - id: checkout
         name: Checkout code 🛒
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: transfer-action
 
@@ -56,7 +56,7 @@ jobs:
       - id: checkout-again
         # have to do this because the `checkout-upload` step cleans the working dir
         name: Checkout code (again) 🛒
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: transfer-action
 
@@ -70,7 +70,7 @@ jobs:
     steps:
       - id: checkout
         name: Checkout code 🛒
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: transfer-action
 
@@ -114,19 +114,19 @@ jobs:
     steps:
       - id: checkout
         name: Checkout code 🛒
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # otherwise, you will failed to push refs to dest repo
 
       - id: auto-doc
         name: Run auto-doc 📃
-        uses: tj-actions/auto-doc@v2.3.2
+        uses: tj-actions/auto-doc@v3
         with:
-          action: 'action.yaml'
+          filename: 'action.yaml'
 
       - id: changes
         name: Verify changed files 🔎
-        uses: tj-actions/verify-changed-files@v14.0.1
+        uses: tj-actions/verify-changed-files@v20
         with:
           files: |
             README.md
@@ -150,11 +150,11 @@ jobs:
     steps:
       - id: checkout
         name: Checkout code 🛒
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - id: version
         name: Calculate next version 🔢
-        uses: reecetech/version-increment@2023.3.1
+        uses: reecetech/version-increment@2024.10.1
 
       - id: release
         if: ${{ github.ref_name == github.event.repository.default_branch }}
