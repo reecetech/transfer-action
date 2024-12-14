@@ -100,7 +100,7 @@ runs:
     - id: clone
       if: inputs.checkout == 'true' && inputs.direction == 'upload'
       name: Clone repo ⧉
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: ${{ inputs.checkout-fetch-depth }}
 
@@ -115,17 +115,18 @@ runs:
     - id: transfer-up
       if: inputs.direction == 'upload'
       name: Transfer data to GitHub 🆙
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         if-no-files-found: ${{ inputs.if-no-files-found }}
         name: ${{ steps.verify.outputs.name }}
         path: ${{ steps.verify.outputs.path }}
         retention-days: 1
+        include-hidden-files: true
 
     - id: transfer-down
       if: inputs.direction == 'download'
       name: Transfer data from GitHub ⬇️
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ steps.verify.outputs.name }}
         path: ${{ steps.verify.outputs.path }}
